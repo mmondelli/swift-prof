@@ -7,14 +7,16 @@ library("sqldf")
 colours <- c("yellow","gray64","blue","red","green","deeppink2","turquoise3","orange2","orange4","darkorchid","gold","dimgray","deepskyblue4","firebrick","plum")
 ajuste <- par(mar=c(1,4,3,1)+0.6)
 drv <- dbDriver("PostgreSQL")
-con <- dbConnect(drv, dbname = "gecko",
-                 host = "localhost", port = 5432,
-                 user = "postgres", password = 'postgres')
+con <- dbConnect(SQLite(), "~/swift_provenance.db")
+
+#con <- dbConnect(drv, dbname = "swift_provenance",
+#                 host = "localhost", port = 5432,
+#                 user = "postgres", password = 'postgres')
 
 run_ids <- as.vector(dbGetQuery(con, "select script_run_id from script_run")[,1])
 
 ui <- fluidPage(
-  titlePanel(tags$strong('Swift provenance profiling')),
+  titlePanel('HPSW-Prof: High Perfomance Scientific Workflows Profiler'),
   hr(),
   
   #Input
