@@ -15,9 +15,9 @@ dashboardPage(skin = "blue",
           menuItem("Predictions", tabName = "predictions"),
 
           menuItem("Download",
-                   radioButtons(inputId = "downloadFormatt", label = "Choose a format: ", choices = list("png","pdf"), inline = TRUE),
-                   downloadButton(outputId = "downloadButton", label = "Download",
-                                  tags$style(type='text/css', "#downloadButton { width: 100px; margin:auto; display:block; }"))
+                   radioButtons(inputId = "downloadFormatt", label = "Choose a format: ",
+                                choices = list("png","pdf"), inline = TRUE),
+                   downloadButton(outputId = "downloadButton", label = "Download")
           ),
           menuItem("Source code", icon = icon("file-code-o"),
                     href = "https://github.com/mmondelli/swift-prof"

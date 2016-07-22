@@ -150,18 +150,24 @@ function(input, output, clientData, session) {
     legend("topleft", xpd = TRUE, model.legend, col=colours, lty = 1, cex = 1, bty="n")
   })
 
+
   #Download plot
   output$downloadButton <- downloadHandler(
     filename = function(){
-      paste(input$scriptId,input$var3,sep=".")
+      paste(input$scriptId,input$downloadFormatt,sep=".")
     },
     content = function(file){
-      if(input$var3 == "png")
+      if(input$downloadFormatt == "png")
         png(file)
       else
         pdf(file)
 
       {
+        apps <- v$data[ ,1]
+        bytes <- v$data[ ,4]
+        duration <- v$data[ ,2]
+        cpu <- v$data[ ,3]
+        memoria <- v$data[ ,6]
       #Duration
       barplot(duration, log = "y", las=2, main = "Tarefa x Duração", beside=TRUE, col=colours,
               ylab = "Tempo médio de duração", xlab = "Tarefa", cex.names=0.2)
@@ -177,8 +183,6 @@ function(input, output, clientData, session) {
       barplot(memoria,log = "y", las=2, main= "Tarefa x Memoria",beside=TRUE,col=colours,
               ylab = "Tempo de duracao",xlab = "Tarefa",cex.names=0.5)
       }
-
-      dbDisconnect(con)
       dev.off()
       }
     )
