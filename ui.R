@@ -49,32 +49,39 @@ dashboardPage(skin = "blue",
           fluidRow(
             box(
               title = "Duration", background = "black", solidHeader = TRUE, collapsible = TRUE,
-              plotOutput(outputId = "plotDuration")
+              plotOutput("plotDuration")
             ),
 
             box(
               title = "Cpu Usage", background = "black", solidHeader = TRUE, collapsible = TRUE,
-              plotOutput(outputId = "plotCpu")
+              plotOutput("plotCpu")
             ),
 
             box(
               title = "Written Bytes", background = "black", solidHeader = TRUE, collapsible = TRUE,
-              plotOutput(outputId = "plotBytesWritten")
+              plotOutput("plotBytesWritten")
             ),
 
             box(
               title = "Read Bytes", background = "black", solidHeader = TRUE, collapsible = TRUE,
-              plotOutput(outputId = "plotBytesRead")
+              plotOutput("plotBytesRead")
             ),
 
             box(
               title = "Memory used", background = "black", solidHeader = TRUE, collapsible = TRUE,
-              plotOutput(outputId = "plotMemory")
+              plotOutput("plotMemory")
             )
           )#fim fluidRow
          ),#fim tabItem
-         tabItem("prediction"
-         )
+         tabItem(tabName = "prediction",
+          fluidRow(
+            box(
+              title = "Regression", solidHeader = TRUE,
+              collapsible = TRUE,
+              plotOutput("plotRegression", height = 250)
+            )
+          )
+         )#fim tabItem
         )#fim tabItems
       )#fim body
     )

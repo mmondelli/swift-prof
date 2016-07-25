@@ -120,7 +120,7 @@ function(input, output, clientData, session) {
                                              input$scriptId,"'", sep = ""))
 
     #Query Regression
-    input = dbGetQuery(con, paste("select s.script_run_id, f.size from staged_in i, file f, app_exec a, script_run s
+    data = dbGetQuery(con, paste("select s.script_run_id, f.size from staged_in i, file f, app_exec a, script_run s
                                    where f.file_id = i.file_id
                                    and a.app_exec_id = i.app_exec_id
                                    and a.script_run_id = s.script_run_id
@@ -128,22 +128,22 @@ function(input, output, clientData, session) {
                                    and i.file_id not in (select o.file_id from staged_out o)", sep = ""))
     duration = dbGetQuery(con, paste("select script_run_id, duration from script_run where script_filename='",script_name, "'", sep = ""))
 
-    input$size <- as.numeric(input$size)
-    sum.size <- aggregate(input$size ~ input$script_run_id, input, FUN = function(x){sum(as.numeric(x))})
+    data$size <- as.numeric(data$size)
+    sum.size <- aggregate(data$size ~ data$script_run_id, data, FUN = function(x){sum(as.numeric(x))})
 
     #Join
     colnames(sum.size) <- c("script_run_id", "size")
-    result <- join(sum.size, duration)
+    data <- join(sum.size, duration)
 
     #Plot
-    plot(result$size, result$duration, xlab="Input size", ylab="Total execution time (s)", pch=20,
-         xlim=range(result$size,result$size))
+    plot(data$size, data$duration, xlab="Input size", ylab="Total execution time (s)", pch=20,
+         xlim=range(data$size,data$size))
 
     #Linear
-    model <- lm(result$duration ~ result$size) # (y~x)
+    model <- lm(data$duration ~ data$size) # (y~x)
     abline(model, col = colours)
     #Quadratic
-    model.2 <- lm(result$duration ~ poly(result$size, 2, raw=TRUE), result)
+    model.2 <- lm(data$duration ~ poly(data$size, 2, raw=TRUE), data)
     curve(coefficients(model.2)[1] + coefficients(model.2)[2]*x + coefficients(model.2)[3]*x*x, add = T, col = colours[2])
     #Description
     model.legend = c("Linear", "Quadratic")
