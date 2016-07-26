@@ -73,12 +73,15 @@ dashboardPage(skin = "blue",
             )
           )#fim fluidRow
          ),#fim tabItem
-         tabItem(tabName = "prediction",
+         tabItem(tabName = "predictions",
           fluidRow(
             box(
               title = "Regression", solidHeader = TRUE,
               collapsible = TRUE,
-              plotOutput("plotRegression", height = 250)
+              plotOutput("plotRegression", height = 500)
+            ),
+            box(width = 2, status = "warning",
+                formattableOutput("tableDescription")
             )
           )
          )#fim tabItem

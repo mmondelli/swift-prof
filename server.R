@@ -30,24 +30,30 @@ function(input, output, clientData, session) {
 
   #Boxes
   output$totalTime <- renderValueBox({
-    if (is.null(v$data)) return()
     time <- dbGetQuery(con, paste("select duration from script_run where script_run_id ='",
                                   input$scriptId,"'", sep=""))
-    valueBox(time, "Total execution time (secs)", icon("area-chart"))
+    if (is.null(v$data))
+      valueBox("0", "Total execution time (secs)", icon("area-chart")) 
+    else
+      valueBox(time, "Total execution time (secs)", icon("area-chart"))
   })
 
   output$totalApps <- renderValueBox({
-    if (is.null(v$data)) return()
-    app <- dbGetQuery(con, paste("select count(*) from app_exec where script_run_id ='",
+     app <- dbGetQuery(con, paste("select count(*) from app_exec where script_run_id ='",
                                  input$scriptId,"' group by script_run_id", sep=""))
-    valueBox(app,"Total apps executed", color = 'yellow',icon("bar-chart"))
+    if (is.null(v$data))
+      valueBox("0","Total apps executed", color = 'yellow',icon("bar-chart"))
+    else
+      valueBox(app,"Total apps executed", color = 'yellow',icon("bar-chart"))
   })
 
   output$finalState <- renderValueBox({
-    if (is.null(v$data)) return()
     final.state <- dbGetQuery(con, paste("select final_state from script_run where script_run_id ='",
                                          input$scriptId,"'", sep=""))
-    valueBox(final.state, "Final state",
+    if (is.null(v$data))
+      valueBox("None","Final state", color = "red")
+    else
+      valueBox(final.state, "Final state",
              color = if (identical(as.character(final.state), "SUCCESS")) "green" else "red")
   })
 
@@ -116,18 +122,14 @@ function(input, output, clientData, session) {
 
   #Plot Regression
   output$plotRegression <- renderPlot({
-    script_name <- dbGetQuery(con, paste("select script_filename from script_run where script_run_id='",
-                                             input$scriptId,"'", sep = ""))
-
     #Query Regression
     data = dbGetQuery(con, paste("select s.script_run_id, f.size from staged_in i, file f, app_exec a, script_run s
                                    where f.file_id = i.file_id
                                    and a.app_exec_id = i.app_exec_id
                                    and a.script_run_id = s.script_run_id
-                                   and s.script_filename = '",script_name,"'
+                                   and s.script_filename = '",input$scriptName,"'
                                    and i.file_id not in (select o.file_id from staged_out o)", sep = ""))
-    duration = dbGetQuery(con, paste("select script_run_id, duration from script_run where script_filename='",script_name, "'", sep = ""))
-
+    duration = dbGetQuery(con, paste("select script_run_id, duration from script_run where script_filename='",input$scriptName, "'", sep = ""))
     data$size <- as.numeric(data$size)
     sum.size <- aggregate(data$size ~ data$script_run_id, data, FUN = function(x){sum(as.numeric(x))})
 
@@ -135,19 +137,33 @@ function(input, output, clientData, session) {
     colnames(sum.size) <- c("script_run_id", "size")
     data <- join(sum.size, duration)
 
-    #Plot
-    plot(data$size, data$duration, xlab="Input size", ylab="Total execution time (s)", pch=20,
-         xlim=range(data$size,data$size))
-
+    indexes = sort(sample(nrow(data), nrow(data)*.7))
+    
+    #Training
+    train = data[indexes,]
+    plot.train = plot(train$size, train$duration, xlab="Input size", ylab="Total execution time (s)", pch = 20, 
+                      xlim=range(train$size, train$size))
+    #Test
+    test = data[-indexes,]
+    points(test$size, test$duration, pch = 20, col = "red")
+    
     #Linear
-    model <- lm(data$duration ~ data$size) # (y~x)
-    abline(model, col = colours)
+    model <- lm(train$duration ~ train$size) # (y~x)
+    abline(model, col=colours[1])
     #Quadratic
-    model.2 <- lm(data$duration ~ poly(data$size, 2, raw=TRUE), data)
+    model.2 <- lm(train$duration ~ poly(train$size, 2, raw=TRUE), train)
     curve(coefficients(model.2)[1] + coefficients(model.2)[2]*x + coefficients(model.2)[3]*x*x, add = T, col = colours[2])
     #Description
     model.legend = c("Linear", "Quadratic")
     legend("topleft", xpd = TRUE, model.legend, col=colours, lty = 1, cex = 1, bty="n")
+    
+    #Table Description
+    output$tableDescription <- renderFormattable({
+      sets <- c("Training set", "Testing set")
+      points <- c(nrow(train), nrow(test))
+      tableDescription <- data.frame(sets, points)
+      formattable(tableDescription, list(sets = formatter("span", style = x ~ style(color = c("black", "red")))))
+    })
   })
 
 
