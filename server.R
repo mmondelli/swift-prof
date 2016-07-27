@@ -53,7 +53,7 @@ function(input, output, clientData, session) {
     if (is.null(v$data))
       valueBox("None","Final state", color = "red")
     else
-      valueBox(final.state, "Final state",
+      valueBox(final.state, "Final state", icon("gears"),
              color = if (identical(as.character(final.state), "SUCCESS")) "green" else "red")
   })
 
@@ -159,11 +159,18 @@ function(input, output, clientData, session) {
     
     #Table Description
     output$tableDescription <- renderFormattable({
-      sets <- c("Training set", "Testing set")
+      sets <- c("Training", "Testing")
       points <- c(nrow(train), nrow(test))
       tableDescription <- data.frame(sets, points)
       formattable(tableDescription, list(sets = formatter("span", style = x ~ style(color = c("black", "red")))))
     })
+    
+    output$textDataSumamry <- renderTable({
+      sum.table <- rbind(t(summary(data$size)), t(summary(data$duration)))
+      rownames(sum.table) <- c("size", "duration")
+      print(sum.table)
+    })
+   
   })
 
 

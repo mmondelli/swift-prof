@@ -41,8 +41,8 @@ dashboardPage(skin = "blue",
               tabBox(
                 title = "Summary",
                 id = "tabsetSummary", height = "250px", width = 9,
-                tabPanel("Summary", verbatimTextOutput("summaryPlot")),
-                tabPanel("Table", tableOutput("tableQuery"))
+                tabPanel("Table", tableOutput("tableQuery")),
+                tabPanel("Summary", verbatimTextOutput("summaryPlot"))
               )#fim tabbox
             ), #fim fluidRow
 
@@ -76,11 +76,14 @@ dashboardPage(skin = "blue",
          tabItem(tabName = "predictions",
           fluidRow(
             box(
-              title = "Regression", solidHeader = TRUE,
+              title = "Regression ", solidHeader = TRUE,
               collapsible = TRUE,
               plotOutput("plotRegression", height = 500)
             ),
-            box(width = 2, status = "warning",
+            box(title = "Data Summary", width = 6, status = "warning",
+                tableOutput("textDataSumamry")
+            ),
+            box(title = "Regression Summary", width = 6, status = "warning",
                 formattableOutput("tableDescription")
             )
           )
