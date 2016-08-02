@@ -6,10 +6,11 @@ function(input, output, clientData, session) {
   observe({
     ids <- reactive({
       dbGetQuery(con, paste("select script_run_id from script_run where script_filename = '",
-                            input$scriptName,"'", sep=""))
+                            input$scriptName,"' and start_time between '", as.Date(input$dateId[1], "%Y-%m-%d"), "%' and '", 
+                            as.Date(input$dateId[2], "%Y-%m-%d"), "%'", sep=""))
     }) #fim reactive
 
-
+  print(ids())
     updateSelectInput(session, inputId = "scriptId", choices = ids())
   })#fim observe
 
@@ -26,6 +27,7 @@ function(input, output, clientData, session) {
                             and s.script_run_id = '",input$scriptId,"'
                             group by a.app_name",sep=""))
     #print(v$data)
+    
   })
 
   #Boxes

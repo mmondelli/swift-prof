@@ -6,6 +6,7 @@ dashboardPage(skin = "blue",
           selectInput("scriptName", "Script Name", choices = script_names),
           menuItem("Profiler", tabName = "profiler"),
           conditionalPanel("input.sidebarmenu === 'profiler'",
+                           dateRangeInput("dateId", "Date range"),
                            selectInput("scriptId", "Script Id", choices = NULL),
                            actionButton("updateButton", "Update",
                                         tags$style(type='text/css', "#updateButton { width: 100px;
