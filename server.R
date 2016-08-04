@@ -10,7 +10,6 @@ function(input, output, clientData, session) {
                             as.Date(input$dateId[2], "%Y-%m-%d"), "%'", sep=""))
     }) #fim reactive
 
-  print(ids())
     updateSelectInput(session, inputId = "scriptId", choices = ids())
   })#fim observe
 
@@ -121,60 +120,72 @@ function(input, output, clientData, session) {
     barplot(memoria,log = "y", las=2, main= "Apps x Memory",beside=TRUE,col=colours,
             ylab = "AVG Used Memory",cex.names=0.5)
     })
-
-  #Plot Regression
-  output$plotRegression <- renderPlot({
-    #Query Regression
-    data = dbGetQuery(con, paste("select s.script_run_id, f.size from staged_in i, file f, app_exec a, script_run s
+  
+  #-----------------------------------------------------------------------------------------------------------------------
+  
+  #Query Regression
+  r.data <- reactive({
+    d <- dbGetQuery(con, paste("select s.script_run_id, f.size from staged_in i, file f, app_exec a, script_run s
                                    where f.file_id = i.file_id
                                    and a.app_exec_id = i.app_exec_id
                                    and a.script_run_id = s.script_run_id
                                    and s.script_filename = '",input$scriptName,"'
                                    and i.file_id not in (select o.file_id from staged_out o)", sep = ""))
-    duration = dbGetQuery(con, paste("select script_run_id, duration from script_run where script_filename='",input$scriptName, "'", sep = ""))
-    data$size <- as.numeric(data$size)
-    sum.size <- aggregate(data$size ~ data$script_run_id, data, FUN = function(x){sum(as.numeric(x))})
-
-    #Join
+    d$size <- as.numeric(d$size)
+    sum.size <- aggregate(d$size ~ d$script_run_id, d, FUN = function(x){sum(as.numeric(x))})
     colnames(sum.size) <- c("script_run_id", "size")
-    data <- join(sum.size, duration)
-
-    indexes = sort(sample(nrow(data), nrow(data)*.7))
     
-    #Training
-    train = data[indexes,]
-    plot.train = plot(train$size, train$duration, xlab="Input size", ylab="Total execution time (s)", pch = 20, 
-                      xlim=range(train$size, train$size))
-    #Test
-    test = data[-indexes,]
-    points(test$size, test$duration, pch = 20, col = "red")
+    duration <- dbGetQuery(con, paste("select script_run_id, duration from script_run where script_filename='",input$scriptName, "'", sep = ""))
     
-    #Linear
-    model <- lm(train$duration ~ train$size) # (y~x)
-    abline(model, col=colours[1])
-    #Quadratic
-    model.2 <- lm(train$duration ~ poly(train$size, 2, raw=TRUE), train)
-    curve(coefficients(model.2)[1] + coefficients(model.2)[2]*x + coefficients(model.2)[3]*x*x, add = T, col = colours[2])
-    #Description
-    model.legend = c("Linear", "Quadratic")
-    legend("topleft", xpd = TRUE, model.legend, col=colours, lty = 1, cex = 1, bty="n")
-    
-    #Table Description
-    output$tableDescription <- renderFormattable({
-      sets <- c("Training", "Testing")
-      points <- c(nrow(train), nrow(test))
-      tableDescription <- data.frame(sets, points)
-      formattable(tableDescription, list(sets = formatter("span", style = x ~ style(color = c("black", "red")))))
-    })
-    
-    output$textDataSumamry <- renderTable({
-      sum.table <- rbind(t(summary(data$size)), t(summary(data$duration)))
-      rownames(sum.table) <- c("size", "duration")
-      print(sum.table)
-    })
+    r.data <- join(sum.size, duration)
+  })
+  
+  indexes <- reactive({ sort(sample(nrow(r.data()), nrow(r.data())*.7)) }) 
+  #Training
+  train <- reactive({ r.data()[indexes(),] }) 
+  #Test
+  test <- reactive({ r.data()[-indexes(),] })
+  
+  #Linear
+  model <- reactive({ lm(train()[ ,3] ~ train()[ ,2]) }) #(y~x) duration~size
+  #Quadratic
+  model.2 <- reactive({ lm(train()[ ,3] ~ poly(train()[ ,2], 2, raw=TRUE), train()) })
+  
+  
+  #Plot Regression
+  output$plotRegression <- renderPlot({
+   plot.train = plot(train()[ ,2], train()[ ,3], xlab="Input size", ylab="Total execution time (s)", pch = 20, 
+                       xlim=range(train()[ ,2], train()[ ,2]))
+   points(test()[ ,2], test()[ ,3], pch = 20, col = "red")
+   abline(model(), col=colours[1])
+   curve(coefficients(model.2())[1] + coefficients(model.2())[2]*x + coefficients(model.2())[3]*x*x, add = T, col = colours[2])
    
+   #Description
+   model.legend = c("Linear", "Quadratic")
+   legend("topleft", xpd = TRUE, model.legend, col=colours, lty = 1, cex = 1, bty="n")
+  })
+  
+  #Table Description
+  output$tableDescription <- renderFormattable({
+    sets <- c("Training", "Testing")
+    points <- c(nrow(train()), nrow(test()))
+    tableDescription <- data.frame(sets, points)
+    formattable(tableDescription, list(sets = formatter("span", style = x ~ style(color = c("black", "red")))))
+  })
+  
+  #Statistics
+  output$textDataSummary <- renderTable({
+    sum.table <- rbind(t(summary(r.data()[ ,2])), t(summary(r.data()[ ,3])))
   })
 
+  #Estimate
+  output$executionTime <- renderPrint({
+    attach(train())
+    m.2 <- lm(duration ~ poly(size, 2, raw=TRUE), train())
+    new <- data.frame(size=as.numeric(input$inputSize))
+    time.2 <- predict(m.2, new, interval = 'predict')
+    print(time.2[1])
+  })
 
   #Download plot
   output$downloadButton <- downloadHandler(

@@ -76,16 +76,23 @@ dashboardPage(skin = "blue",
          ),#fim tabItem
          tabItem(tabName = "predictions",
           fluidRow(
+            box(title = "Statistics", width = 9, status = "warning",
+                tableOutput("textDataSummary")
+            ),
+            box(title = "Summary", width = 3, status = "warning",
+                formattableOutput("tableDescription")
+            ),
             box(
               title = "Regression ", solidHeader = TRUE,
-              collapsible = TRUE,
+              collapsible = TRUE, width = 8,
               plotOutput("plotRegression", height = 500)
             ),
-            box(title = "Data Summary", width = 6, status = "warning",
-                tableOutput("textDataSumamry")
-            ),
-            box(title = "Regression Summary", width = 6, status = "warning",
-                formattableOutput("tableDescription")
+            box(
+              title = "Estimate execution time", solidHeader = TRUE,
+              collapsible = TRUE, status = "info", width = 4,
+              textInput("inputSize", "Inform your workflow input size (bytes):"),
+              helpText("Estimate execution time (secs):"),
+              textOutput("executionTime")
             )
           )
          )#fim tabItem
