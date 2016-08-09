@@ -178,8 +178,17 @@ function(input, output, clientData, session) {
     sum.table <- rbind(t(summary(r.data()[ ,2])), t(summary(r.data()[ ,3])))
   })
 
-  #Estimate
+  #Estimate 1
   output$executionTime <- renderPrint({
+    attach(train())
+    m <- lm(duration ~ size, train())
+    new <- data.frame(size=as.numeric(input$inputSize))
+    time <- predict(m, new, interval = 'predict')
+    print(time[1])
+  })
+  
+  #Estimate 2
+  output$executionTime2 <- renderPrint({
     attach(train())
     m.2 <- lm(duration ~ poly(size, 2, raw=TRUE), train())
     new <- data.frame(size=as.numeric(input$inputSize))

@@ -94,8 +94,11 @@ dashboardPage(skin = "blue",
                               title = "Estimate execution time", solidHeader = TRUE,
                               collapsible = TRUE, status = "info", width = 4,
                               textInput("inputSize", "Inform your workflow input size (bytes):"),
-                              helpText("Estimate execution time (secs):"),
-                              textOutput("executionTime")
+                              p("Estimate execution time (secs)"),
+                              helpText("Based on the linear model:"),
+                              textOutput("executionTime"),
+                              helpText("Based on the quadratic model:"),
+                              textOutput("executionTime2")
                             )
                           )
                   )#fim tabItem
