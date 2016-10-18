@@ -79,7 +79,13 @@ dashboardPage(skin = "blue",
                             box(
                               title = "System and User CPU usage", background = "black", solidHeader = TRUE, collapsible = TRUE,
                               plotOutput("plotKernelUser")
+                            ),
+                            
+                            box(
+                              title = "Data read and written", background = "black", solidHeader = TRUE, collapsible = TRUE,
+                              plotOutput("plotReadWritten")
                             )
+                            
                           )#fim fluidRow
                   ),#fim tabItem
                   tabItem(tabName = "predictions",

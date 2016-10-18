@@ -3,6 +3,7 @@ function(input, output, clientData, session) {
   #Data = NULL to avoid errors
   v <- reactiveValues(data = NULL)
   cpu <- reactiveValues(data = NULL)
+  rw <- reactiveValues(data = NULL)
   
   observe({
     ids <- reactive({
@@ -28,13 +29,25 @@ function(input, output, clientData, session) {
                                     group by a.app_name",sep=""))
     #print(v$data)
     
-    cpu$data <- dbGetQuery(con, paste("SELECT app_name, 
+    cpu$data <- dbGetQuery(con, paste("select app_name, 
                                     100*sum(kernel_secs)/(sum(kernel_secs)+sum(user_secs)) as sys_percent, 
                                     100*sum(user_secs)/(sum(kernel_secs)+sum(user_secs)) as user_percent 
                                     from app_exec natural join resource_usage
                                     where script_run_id='",input$scriptId,"'
                                     group by app_name;",sep=""))
-    print(cpu$data)
+    #print(cpu$data)
+    
+    rw$data <- dbGetQuery(con, paste("select * from 
+                                      (select app_name,(sum(size)/1024/1024) as read 
+                                      from file natural join staged_in natural join app_exec 
+                                      where script_run_id='",input$scriptId,"'
+                                      group by app_name)
+                                      natural join
+                                      (select app_name,(sum(size)/1024/1024) as written 
+                                      from file natural join staged_out natural join app_exec 
+                                      where script_run_id='",input$scriptId,"' 
+                                      group by app_name);",sep=""))
+    print(rw$data)
   })
   
   #Boxes
@@ -132,6 +145,7 @@ function(input, output, clientData, session) {
             ylab = "AVG Used Memory",cex.names=0.5)
     })
   
+  #Plot Kernel x User
   output$plotKernelUser <- renderPlot({
     if (is.null(cpu$data)) return()
     subset <- t(data.frame(cpu$data[ ,2], cpu$data[ ,3]))
@@ -140,6 +154,17 @@ function(input, output, clientData, session) {
             beside=TRUE, ylim=c(0,100),
             col=c(colours[1:2]), main = "Apps x CPU usage",
             ylab = "Percentage of use", xlab = "Activity (see Legend box above)")
+  })
+  
+  #Plot total read and write
+  output$plotReadWritten <- renderPlot({
+    if (is.null(rw$data)) return()
+    subset <- t(data.frame(rw$data[ ,2], rw$data[ ,3]))
+    
+    barplot(subset, names.arg=1:length(rw$data[ ,1]), legend = c("read", "write"),
+            beside=TRUE, ylim=c(0,max(subset)),
+            col=c(colours[3:4]), main = "Total data read and written",
+            ylab = "Data (Mb)", xlab = "Activity (see Legend box above)")
   })
   
   #-----------------------------------------------------------------------------------------------------------------------
