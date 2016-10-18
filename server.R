@@ -44,7 +44,7 @@ function(input, output, clientData, session) {
     if (is.null(v$data))
       valueBox("0", "Total execution time (secs)", icon("area-chart")) 
     else
-      valueBox(time, "Total execution time (secs)", icon("area-chart"))
+      valueBox(round(time, digits = 2), "Total execution time (secs)", icon("area-chart"))
   })
   
   output$totalApps <- renderValueBox({
@@ -85,10 +85,10 @@ function(input, output, clientData, session) {
     #print(length.legend)
     colorLegend <- colours[1:length.legend]
     df <- data.frame(apps, numbers = 1:length.legend, stringsAsFactors=FALSE)
-    appsNumbered <- paste(df$numbers, apps, sep=". ")
-    print(appsNumbered)
-    tableLegend <- data.frame(appsNumbered)
-    formattable(tableLegend, list(appsNumbered = formatter("span", style = x ~ style(color = colorLegend))))
+    apps <- paste(df$numbers, apps, sep=". ")
+    print(apps)
+    tableLegend <- data.frame(apps)
+    formattable(tableLegend, list(apps = formatter("span", style = x ~ style(color = colorLegend))))
   })
   
   #Plot Duration
@@ -138,7 +138,7 @@ function(input, output, clientData, session) {
     
     barplot(subset, names.arg=1:length(cpu$data[ ,1]), legend = c("sys_percent", "user_percent"),
             beside=TRUE, ylim=c(0,100),
-            col=c(colours[1:2]),
+            col=c(colours[1:2]), main = "Apps x CPU usage",
             ylab = "Percentage of use", xlab = "Activity (see Legend box above)")
   })
   
