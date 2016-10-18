@@ -74,6 +74,11 @@ dashboardPage(skin = "blue",
                             box(
                               title = "Memory used", background = "black", solidHeader = TRUE, collapsible = TRUE,
                               plotOutput("plotMemory")
+                            ),
+                            
+                            box(
+                              title = "System and User CPU usage", background = "black", solidHeader = TRUE, collapsible = TRUE,
+                              plotOutput("plotKernelUser")
                             )
                           )#fim fluidRow
                   ),#fim tabItem
@@ -82,14 +87,10 @@ dashboardPage(skin = "blue",
                             box(title = "Statistics", width = 9, status = "warning",
                                 tableOutput("textDataSummary")
                             ),
-                            box(title = "Summary", width = 3, status = "warning",
-                                formattableOutput("tableDescription")
-                            ),
-                            box(
-                              title = "Regression ", solidHeader = TRUE,
-                              collapsible = TRUE, width = 8,
-                              plotOutput("plotRegression", height = 500)
-                            ),
+                            #box(title = "Summary", width = 3, status = "warning",
+                            #    formattableOutput("tableDescription")
+                            #),
+                           
                             box(
                               title = "Estimate execution time", solidHeader = TRUE,
                               collapsible = TRUE, status = "info", width = 4,
@@ -99,6 +100,11 @@ dashboardPage(skin = "blue",
                               textOutput("executionTime"),
                               helpText("Based on the quadratic model:"),
                               textOutput("executionTime2")
+                            ),
+                            box(
+                              title = "Regression ", solidHeader = TRUE,
+                              collapsible = TRUE, width = 8,
+                              plotOutput("plotRegression", height = 500)
                             )
                           )
                   )#fim tabItem

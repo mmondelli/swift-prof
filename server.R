@@ -2,6 +2,7 @@ function(input, output, clientData, session) {
   
   #Data = NULL to avoid errors
   v <- reactiveValues(data = NULL)
+  cpu <- reactiveValues(data = NULL)
   
   observe({
     ids <- reactive({
@@ -27,6 +28,13 @@ function(input, output, clientData, session) {
                                     group by a.app_name",sep=""))
     #print(v$data)
     
+    cpu$data <- dbGetQuery(con, paste("SELECT app_name, 
+                                    100*sum(kernel_secs)/(sum(kernel_secs)+sum(user_secs)) as sys_percent, 
+                                    100*sum(user_secs)/(sum(kernel_secs)+sum(user_secs)) as user_percent 
+                                    from app_exec natural join resource_usage
+                                    where script_run_id='",input$scriptId,"'
+                                    group by app_name;",sep=""))
+    print(cpu$data)
   })
   
   #Boxes
@@ -72,12 +80,15 @@ function(input, output, clientData, session) {
   output$tableLegend <- renderFormattable({
     if (is.null(v$data)) return()
     apps <- v$data[ ,1]
-    print(apps)
+    #print(apps)
     length.legend <- length(apps)
     #print(length.legend)
     colorLegend <- colours[1:length.legend]
-    tableLegend <- data.frame(apps)
-    formattable(tableLegend, list(apps = formatter("span", style = x ~ style(color = colorLegend))))
+    df <- data.frame(apps, numbers = 1:length.legend, stringsAsFactors=FALSE)
+    appsNumbered <- paste(df$numbers, apps, sep=". ")
+    print(appsNumbered)
+    tableLegend <- data.frame(appsNumbered)
+    formattable(tableLegend, list(appsNumbered = formatter("span", style = x ~ style(color = colorLegend))))
   })
   
   #Plot Duration
@@ -120,6 +131,16 @@ function(input, output, clientData, session) {
     barplot(memoria,log = "y", las=2, main= "Apps x Memory",beside=TRUE,col=colours,
             ylab = "AVG Used Memory",cex.names=0.5)
     })
+  
+  output$plotKernelUser <- renderPlot({
+    if (is.null(cpu$data)) return()
+    subset <- t(data.frame(cpu$data[ ,2], cpu$data[ ,3]))
+    
+    barplot(subset, names.arg=1:length(cpu$data[ ,1]), legend = c("sys_percent", "user_percent"),
+            beside=TRUE, ylim=c(0,100),
+            col=c(colours[1:2]),
+            ylab = "Percentage of use", xlab = "Activity (see Legend box above)")
+  })
   
   #-----------------------------------------------------------------------------------------------------------------------
   
