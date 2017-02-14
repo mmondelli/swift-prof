@@ -1,4 +1,4 @@
-#!/bin/bash
+#/bin/bash
 
 # If desired, you can call it with a number, e.g. "runall 013" to
 # skip examples up to but not including 013-selectize.
@@ -7,7 +7,7 @@ trap '' SIGINT
 
 shiny () {
   echo $i
-  R --quiet --slave -e "shiny::runApp(\"$1\", port=7387, launch.browser=TRUE)"
+  R --quiet --slave -e "shiny::runApp(\"$1\", port=7388, launch.browser=TRUE)"
 }
 
 for i in $( ls -d ); do
