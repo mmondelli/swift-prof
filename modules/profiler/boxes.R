@@ -5,7 +5,7 @@ output$totalTime <- renderValueBox({
   if (is.null(v$data))
     valueBox("0", "Total execution time (hours)", icon = icon("clock-o"))
   else
-    valueBox(round(((time/60)/60), digits = 2), "Total execution time (hours)", icon = icon("clock-o"))
+    valueBox(round(((time/60)), digits = 2), "Total execution time (min)", icon = icon("clock-o"))
 })
 
 output$totalApps <- renderValueBox({

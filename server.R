@@ -13,6 +13,7 @@
   gantt <- reactiveValues(data = NULL)
   #app_args <- reactiveValues(data = NULL)
   workflow_args <- reactiveValues(data = NULL)
+  #ids <- reactiveValues(data=NULL)
   
   observe({
     ids <- reactive({
@@ -20,7 +21,7 @@
                             input$scriptName,"' and start_time between '", as.Date(input$dateId[1], "%Y-%m-%d"), "%' and '", 
                             as.Date(input$dateId[2], "%Y-%m-%d"), "%'", sep=""))
     }) #fim reactive
-    
+    #print(ids$data)
     updateSelectInput(session, inputId = "scriptId", choices = ids())
   })#fim observe
   

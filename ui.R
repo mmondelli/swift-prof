@@ -14,8 +14,8 @@ dashboardPage(skin = "blue",
                                                                        margin:auto; margin-bottom: 0.5cm; display:block; }")
                                            ),
                                            menuItem(icon = icon("bar-chart"), "Profiler", tabName = "profiler"),
-                                           menuItem(icon = icon("spinner"), "Execution overview", tabName = "executionOverview"),
-                                           menuItem(icon = icon("search"), "Domain info", tabName = "domainInfo"),
+                                           #menuItem(icon = icon("spinner"), "Execution overview", tabName = "executionOverview"),
+                                           #menuItem(icon = icon("search"), "Domain info", tabName = "domainInfo"),
                                            
                                            # menuItem("Download",
                                            #          radioButtons(inputId = "downloadFormatt", label = "Choose a type: ",
@@ -94,7 +94,7 @@ dashboardPage(skin = "blue",
                               plotOutput("plotReadWritten")
                             )
                           )#fim fluidRow
-                  ),
+                  )#,
                   # tabItem(tabName = "executionOverview",
                   #           box(
                   #             title = "Workflow execution and its arguments",  
@@ -107,7 +107,7 @@ dashboardPage(skin = "blue",
                   #             div(style = 'overflow-x: scroll', DT::dataTableOutput('tableAppsExecution'))
                   #           )
                   #         ),
-                  tabItem(tabName = "domainInfo")
+                  #tabItem(tabName = "domainInfo")
                 )#fim tabItems
               )#fim body
 )

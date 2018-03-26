@@ -35,6 +35,7 @@ output$plotCpu <- renderPlot({
 output$plotBytesWritten <- renderPlot({
   if (is.null(v$data)) return()
   df <- data.frame(v$data[ ,c(1,5)])
+  df <- df[!df$avg_fs_writes == "0", ]
   par(mar=c(5,6,4,2)+0.1)
   barplot(df$avg_fs_writes, 
           las=2,
@@ -162,7 +163,7 @@ output$plotGantt <- renderPlot({
       axis.title.y=element_text(margin=margin(0,20,0,0), face = "bold"),
       axis.title.x=element_text(margin=margin(20,0,0,0), face = "bold")
     ) +
-    scale_y_discrete(name="Number of executed apps", seq(0, nrow(df), by = 50))
+    scale_y_discrete(name="Number of executed apps", seq(0, nrow(df), by = 200))
 })
   
   
